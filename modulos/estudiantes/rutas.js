@@ -50,6 +50,16 @@ module.exports = (db) => {
         });
     });
 
+    router.get('/:id', (req, res) => {
+        db.query("SELECT * FROM estudiante WHERE id = ?", [req.params.id], (err, results) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.json(results);
+        });
+    });
+
     return router;
 };
 
