@@ -1,55 +1,71 @@
 const express = require('express');
 
-const router = express.Router();
 
+
+
+module.exports = (db) => {
+
+    const router = express.Router();
 // Create a new subject
-router.post('/subjects', (req, res) => {
-    const newSubject = {
-        id: subjects.length + 1,
-        name: req.body.name
-    };
-    subjects.push(newSubject);
-    res.status(201).json(newSubject);
+router.post('/', (req, res) => {
+    const { nombre } = req.body;
+
+    db.query("INSERT INTO materias (nombre) VALUES (?)", [nombre], (err, result) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ id: result.insertId, nombre });
+    });
 });
 
 // Read all subjects
-router.get('/subjects', (req, res) => {
-    res.json(subjects);
+router.get('/', (req, res) => {
+
+    db.query("SELECT * FROM materias", (err, results) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(results);
+    });
+
 });
 
 // Read a single subject by ID
-router.get('/subjects/:id', (req, res) => {
-    const subject = subjects.find(s => s.id === parseInt(req.params.id));
-    if (!subject) return res.status(404).send('Subject not found');
-    res.json(subject);
+router.get('/:id', (req, res) => {
+    db.query("SELECT * FROM materias WHERE id = ?", [req.params.id], (err, results) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(results);
+    });
 });
 
 // Update a subject by ID
-router.put('/subjects/:id', (req, res) => {
-    const subject = subjects.find(s => s.id === parseInt(req.params.id));
-    if (!subject) return res.status(404).send('Subject not found');
-
-    subject.name = req.body.name;
-    res.json(subject);
+router.put('/:id', (req, res) => {
+    const { id } = req.params;
+    const { nombre } = req.body;
+    db.query("UPDATE materias SET nombre = ? WHERE id = ?", [nombre, id], (err) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ message: "Subject updated" });
+    });
 });
 
 // Delete a subject by ID
-router.delete('/subjects/:id', (req, res) => {
-    const subjectIndex = subjects.findIndex(s => s.id === parseInt(req.params.id));
-    if (subjectIndex === -1) return res.status(404).send('Subject not found');
-
-    const deletedSubject = subjects.splice(subjectIndex, 1);
-    res.json(deletedSubject);
-});
-
-module.exports = (db) => {
-    router.get("/", (req,res) => {
-        db.query("SELECT * FROM materia", (err, results) => {
-            if (err) {
-                res.status(500).json({ error: err.message });
-                return;
-            }
-            res.json(results);
-        });
+router.delete('/:id', (req, res) => {
+    const { id } = req.params;
+    db.query("DELETE FROM materias WHERE id = ?", [id], (err) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ message: "Subject deleted" });
     });
+});
+return router;
 };
