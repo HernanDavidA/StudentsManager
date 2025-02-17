@@ -23,6 +23,9 @@ const estudiantes = require('../modulos/estudiantes/rutas.js')(db);
 app.use('/api/estudiantes', estudiantes);
 
 
+const materias = require('../modulos/materias/rutas.js')(db);
+app.use('/api/materias', materias);
+
 
 app.listen(config.app.port, () => {
     console.log(`Servidor corriendo en http://localhost:${config.app.port}`);
